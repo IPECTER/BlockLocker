@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
+import org.bukkit.TreeType;
 import org.bukkit.block.Block;
 
 import nl.rutgerkok.blocklocker.AttackType;
@@ -132,6 +134,16 @@ class ChestSettingsImpl implements ChestSettings {
                 return Translation.TAG_PRIVATE;
         }
         throw new AssertionError("Unknown type: " + signType);
+    }
+
+    @Override
+    public boolean isTreeTypeBlacklisted(TreeType treeType) {
+        return this.config.isTreeTypeBlacklisted(treeType);
+    }
+
+    @Override
+    public Set<TreeType> getTreeTypeBlacklist() {
+        return this.config.getTreeTypeBlacklist();
     }
 
 }

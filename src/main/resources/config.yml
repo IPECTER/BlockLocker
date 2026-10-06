@@ -143,5 +143,35 @@ autoExpireDays: 0
 # UNKNOWN - special value for all other unrecognized attacks
 allowDestroyBy: []
 
+# Tree types blacklisted from structure growth protection (StructureGrowEvent).
+# If a tree type is in this blacklist, BlockLocker will not protect blocks against it (returns early).
+# By default, all tree types except the two mushrooms (BROWN_MUSHROOM, RED_MUSHROOM) are blacklisted.
+# Reference: https://helpch.at/docs/1.21.10/org/bukkit/TreeType.html
+treeTypeBlacklist:
+  - ACACIA
+  - AZALEA
+  - BIG_TREE
+  - BIRCH
+  - CHERRY
+  - CHORUS_PLANT
+  - COCOA_TREE
+  - CRIMSON_FUNGUS
+  - DARK_OAK
+  - JUNGLE
+  - JUNGLE_BUSH
+  - MANGROVE
+  - MEGA_PINE
+  - MEGA_REDWOOD
+  - PALE_OAK
+  - PALE_OAK_CREAKING
+  - REDWOOD
+  - SMALL_JUNGLE
+  - SWAMP
+  - TALL_BIRCH
+  - TALL_MANGROVE
+  - TALL_REDWOOD
+  - TREE
+  - WARPED_FUNGUS
+
 # Don't change this, used to check when the config needs to be rewritten
 configVersion: 2

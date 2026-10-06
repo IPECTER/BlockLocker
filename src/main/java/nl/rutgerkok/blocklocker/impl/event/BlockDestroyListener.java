@@ -28,6 +28,7 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.EntityBreakDoorEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.TreeType;
 import org.bukkit.event.world.StructureGrowEvent;
 
 import java.util.Iterator;
@@ -191,6 +192,9 @@ public class BlockDestroyListener extends EventListener {
     @EventHandler(ignoreCancelled = true)
     public void onStructureGrow(StructureGrowEvent event) {
         if (plugin.getChestSettings().allowDestroyBy(AttackType.SAPLING)) {
+            return;
+        }
+        if (plugin.getChestSettings().isTreeTypeBlacklisted(event.getSpecies())) {
             return;
         }
         // Check deleted blocks

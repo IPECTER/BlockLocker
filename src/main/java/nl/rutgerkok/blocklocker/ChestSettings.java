@@ -3,7 +3,9 @@ package nl.rutgerkok.blocklocker;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.bukkit.TreeType;
 import org.bukkit.block.Block;
 
 /**
@@ -83,5 +85,21 @@ public interface ChestSettings extends ProtectableBlocksSettings {
      * @return All possible headers.
      */
     List<String> getSimpleLocalizedHeaders(SignType signType);
+
+    /**
+     * Gets whether the given tree type is blacklisted from structure growth protection.
+     *
+     * @param treeType
+     *            The tree type.
+     * @return True if blacklisted, false otherwise.
+     */
+    boolean isTreeTypeBlacklisted(TreeType treeType);
+
+    /**
+     * Gets the set of tree types blacklisted from structure growth protection.
+     *
+     * @return The blacklisted tree types.
+     */
+    Set<TreeType> getTreeTypeBlacklist();
 
 }

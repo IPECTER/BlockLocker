@@ -33,12 +33,23 @@ final class Config {
                 CONNECT_CONTAINERS = "connectContainers",
                 AUTO_EXPIRE_DAYS = "autoExpireDays",
                 ALLOW_DESTROY_BY = "allowDestroyBy",
+                TREE_TYPE_BLACKLIST = "treeTypeBlacklist",
                 CONFIG_VERSION = "configVersion";
     }
 
     static final String DEFAULT_TRANSLATIONS_FILE = "translations-en.yml";
 
+    private static final Set<TreeType> DEFAULT_TREE_TYPE_BLACKLIST;
+
+    static {
+        Set<TreeType> defaultTypes = EnumSet.allOf(TreeType.class);
+        defaultTypes.remove(TreeType.BROWN_MUSHROOM);
+        defaultTypes.remove(TreeType.RED_MUSHROOM);
+        DEFAULT_TREE_TYPE_BLACKLIST = Collections.unmodifiableSet(defaultTypes);
+    }
+
     private final Set<AttackType> allowDestroyBy;
+    private final Set<TreeType> treeTypeBlacklist;
     private final int autoExpireDays;
     private final boolean connectContainers;
     private final int defaultDoorOpenSeconds;
@@ -61,6 +72,14 @@ final class Config {
         connectContainers = config.getBoolean(Key.CONNECT_CONTAINERS);
         autoExpireDays = config.getInt(Key.AUTO_EXPIRE_DAYS);
         allowDestroyBy = readAttackTypeSet(config.getStringList(Key.ALLOW_DESTROY_BY));
+
+        if (config.contains(Key.TREE_TYPE_BLACKLIST)) {
+            treeTypeBlacklist = readTreeTypeSet(config.getStringList(Key.TREE_TYPE_BLACKLIST));
+        } else if (config.contains("structureGrowBlacklist")) {
+            treeTypeBlacklist = readTreeTypeSet(config.getStringList("structureGrowBlacklist"));
+        } else {
+            treeTypeBlacklist = EnumSet.copyOf(DEFAULT_TREE_TYPE_BLACKLIST);
+        }
 
         // Materials
         protectableMaterialsMap = new EnumMap<>(ProtectionType.class);
@@ -108,6 +127,7 @@ final class Config {
         config.set(Key.CONNECT_CONTAINERS, this.connectContainers);
         config.set(Key.AUTO_EXPIRE_DAYS, this.autoExpireDays);
         config.set(Key.ALLOW_DESTROY_BY, this.allowDestroyBy.stream().map(AttackType::toString).toList());
+        config.set(Key.TREE_TYPE_BLACKLIST, this.treeTypeBlacklist.stream().map(TreeType::name).toList());
         config.set(Key.PROTECTABLE_CONTAINERS, writeMaterialSet(protectableMaterialsMap.get(ProtectionType.CONTAINER)));
         config.set(Key.PROTECTABLE_DOORS, writeMaterialSet(protectableMaterialsMap.get(ProtectionType.DOOR)));
         config.set(Key.PROTECTABLE_ATTACHABLES, writeMaterialSet(protectableMaterialsMap.get(ProtectionType.ATTACHABLE)));
@@ -271,6 +291,9 @@ final class Config {
     }
 
     private UpdatePreference readUpdatePreference(String string) {
+        if (string == null) {
+            return UpdatePreference.DISABLED;
+        }
         Optional<UpdatePreference> updatePreference = UpdatePreference.parse(string);
         if (updatePreference.isPresent()) {
             return updatePreference.get();
@@ -278,5 +301,40 @@ final class Config {
             logger.warning("Unknown update setting: " + string + ". Disabling automatic updater.");
             return UpdatePreference.DISABLED;
         }
+    }
+
+    /**
+     * Gets whether the given tree type is blacklisted from structure growth protection.
+     *
+     * @param treeType
+     *            The tree type.
+     * @return True if blacklisted, false otherwise.
+     */
+    boolean isTreeTypeBlacklisted(TreeType treeType) {
+        if (treeType == null) {
+            return false;
+        }
+        return treeTypeBlacklist.contains(treeType);
+    }
+
+    /**
+     * Gets the unmodifiable set of blacklisted tree types.
+     *
+     * @return Unmodifiable set of blacklisted tree types.
+     */
+    Set<TreeType> getTreeTypeBlacklist() {
+        return Collections.unmodifiableSet(treeTypeBlacklist);
+    }
+
+    private Set<TreeType> readTreeTypeSet(List<String> strings) {
+        Set<TreeType> types = EnumSet.noneOf(TreeType.class);
+        for (String string : strings) {
+            try {
+                types.add(TreeType.valueOf(string.toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException e) {
+                logger.warning("Cannot recognize tree type '" + string + "', ignoring it");
+            }
+        }
+        return types;
     }
 }
